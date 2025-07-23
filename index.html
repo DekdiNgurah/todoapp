@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clean Todo App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .custom-shadow {
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+        .gradient-text {
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .task-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px #3b82f6;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Auth Container -->
+    <div id="auth-container" class="fixed inset-0 flex items-center justify-center bg-white z-50 transition-opacity duration-300">
+        <div class="w-full max-w-md p-8 space-y-8 rounded-xl custom-shadow bg-white">
+            <div class="text-center">
+                <h1 class="text-3xl font-bold gradient-text">Todo App</h1>
+                <p class="mt-2 text-gray-500">Manage your tasks efficiently</p>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Username</label>
+                    <input type="text" id="username" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Enter your username">
+                </div>
+                <button id="login-btn" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    Continue
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App Container -->
+    <div id="app-container" class="hidden max-w-4xl mx-auto p-4 md:p-6">
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-bold gradient-text">My Tasks</h1>
+                <p class="text-sm text-gray-500" id="welcome-message">Welcome back, <span id="current-user" class="font-medium"></span></p>
+            </div>
+            <button id="logout-btn" class="text-gray-500 hover:text-gray-700">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
+        </header>
+
+        <!-- Add Task Form -->
+        <div class="bg-white rounded-xl custom-shadow p-4 mb-6">
+            <form id="task-form" class="flex items-stretch">
+                <input type="text" id="task-input" class="flex-1 task-input border-0 px-4 py-3 rounded-l-xl focus:ring-2 focus:ring-blue-500" placeholder="Add your task here..." autocomplete="off">
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 rounded-r-xl">
+                    <i class="fas fa-plus"></i>
+                </button>
+            </form>
+        </div>
+
+        <!-- Task Filters -->
+        <div class="flex justify-center mb-6 overflow-x-auto">
+            <div class="inline-flex rounded-md shadow-sm" role="group">
+                <button type="button" data-filter="all" class="filter-btn px-4 py-2 text-sm font-medium rounded-l-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50">
+                    All
+                </button>
+                <button type="button" data-filter="active" class="filter-btn px-4 py-2 text-sm font-medium border-t border-b border-gray-200 bg-white text-gray-700 hover:bg-gray-50">
+                    Active
+                </button>
+                <button type="button" data-filter="completed" class="filter-btn px-4 py-2 text-sm font-medium rounded-r-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50">
+                    Completed
+                </button>
+            </div>
+        </div>
+
+        <!-- Tasks List -->
+        <div id="tasks-container" class="space-y-3">
+            <!-- Tasks will be dynamically added here -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="empty-state" class="hidden flex flex-col items-center justify-center py-12">
+            <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/ee8e7244-3303-4e29-9b6b-df7d3e6871bd.png" alt="Illustration of an empty task list showing a clipboard with a checkmark and a pencil" class="mb-4 rounded-lg">
+            <h3 class="text-lg font-medium text-gray-900">No tasks yet</h3>
+            <p class="text-gray-500 text-center max-w-md mt-1">Click the plus button above to add your first task. <br>You'll see it appear here.</p>
+        </div>
+
+        <!-- Edit Modal -->
+        <div id="edit-modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden z-40">
+            <div class="bg-white rounded-xl p-6 w-full max-w-md mx-4">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-medium">Edit Task</h3>
+                    <button id="close-modal" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <input type="text" id="edit-task-input" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                <div class="mt-4 flex justify-end space-x-2">
+                    <button id="cancel-edit" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">Cancel</button>
+                    <button id="save-edit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const authContainer = document.getElementById('auth-container');
+        const appContainer = document.getElementById('app-container');
+        const usernameInput = document.getElementById('username');
+        const loginBtn = document.getElementById('login-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const currentUserDisplay = document.getElementById('current-user');
+        const taskForm = document.getElementById('task-form');
+        const taskInput = document.getElementById('task-input');
+        const tasksContainer = document.getElementById('tasks-container');
+        const emptyState = document.getElementById('empty-state');
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const editModal = document.getElementById('edit-modal');
+        const editTaskInput = document.getElementById('edit-task-input');
+        const closeModalBtn = document.getElementById('close-modal');
+        const cancelEditBtn = document.getElementById('cancel-edit');
+        const saveEditBtn = document.getElementById('save-edit');
+
+        // App State
+        let currentUser = '';
+        let currentFilter = 'all';
+        let tasks = [];
+        let currentEditId = null;
+
+        // Initialize the app
+        function initApp() {
+            // Check if user is already logged in
+            const loggedInUser = localStorage.getItem('currentUser');
+            if (loggedInUser) {
+                currentUser = loggedInUser;
+                loadUserData();
+                showApp();
+            }
+        }
+
+        // Load user data from localStorage
+        function loadUserData() {
+            const userTasks = localStorage.getItem(`tasks_${currentUser}`);
+            if (userTasks) {
+                tasks = JSON.parse(userTasks);
+                renderTasks();
+            } else {
+                tasks = [];
+            }
+            currentUserDisplay.textContent = currentUser;
+        }
+
+        // Save user data to localStorage
+        function saveUserData() {
+            localStorage.setItem(`tasks_${currentUser}`, JSON.stringify(tasks));
+        }
+
+        // Show the main app interface
+        function showApp() {
+            authContainer.classList.add('hidden');
+            appContainer.classList.remove('hidden');
+            renderTasks();
+        }
+
+        // Show the auth interface
+        function showAuth() {
+            authContainer.classList.remove('hidden');
+            appContainer.classList.add('hidden');
+            usernameInput.value = '';
+        }
+
+        // Render tasks based on current filter
+        function renderTasks() {
+            tasksContainer.innerHTML = '';
+            
+            const filteredTasks = tasks.filter(task => {
+                if (currentFilter === 'all') return true;
+                if (currentFilter === 'active') return !task.completed;
+                if (currentFilter === 'completed') return task.completed;
+                return true;
+            });
+
+            if (filteredTasks.length === 0) {
+                emptyState.classList.remove('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+                filteredTasks.forEach(task => {
+                    const taskElement = document.createElement('div');
+                    taskElement.className = `bg-white rounded-xl custom-shadow overflow-hidden transition-all ${task.completed ? 'opacity-75' : ''}`;
+                    taskElement.innerHTML = `
+                        <div class="p-4 flex items-start">
+                            <button class="complete-btn mt-1 mr-3 flex-shrink-0 ${task.completed ? 'text-green-500' : 'text-gray-300'} hover:text-green-500" data-id="${task.id}">
+                                <i class="fas fa-${task.completed ? 'check-circle' : 'circle'}"></i>
+                            </button>
+                            <div class="flex-grow">
+                                <div class="flex justify-between items-start">
+                                    <p class="${task.completed ? 'line-through text-gray-400' : 'text-gray-700'}">${task.text}</p>
+                                    <div class="flex space-x-2">
+                                        <button class="edit-btn text-gray-400 hover:text-blue-500" data-id="${task.id}">
+                                            <i class="fas fa-pencil-alt"></i>
+                                        </button>
+                                        <button class="delete-btn text-gray-400 hover:text-red-500" data-id="${task.id}">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <small class="text-xs text-gray-400 mt-1 block">Added: ${new Date(task.timestamp).toLocaleString()}</small>
+                            </div>
+                        </div>
+                    `;
+                    tasksContainer.appendChild(taskElement);
+                });
+            }
+        }
+
+        // Event Listeners
+        loginBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const username = usernameInput.value.trim();
+            if (username) {
+                currentUser = username;
+                localStorage.setItem('currentUser', username);
+                loadUserData();
+                showApp();
+            }
+        });
+
+        logoutBtn.addEventListener('click', () => {
+            currentUser = '';
+            localStorage.removeItem('currentUser');
+            tasks = [];
+            showAuth();
+        });
+
+        taskForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const taskText = taskInput.value.trim();
+            if (taskText && currentUser) {
+                const newTask = {
+                    id: Date.now().toString(),
+                    text: taskText,
+                    completed: false,
+                    timestamp: Date.now()
+                };
+                tasks.push(newTask);
+                saveUserData();
+                taskInput.value = '';
+                renderTasks();
+            }
+        });
+
+        tasksContainer.addEventListener('click', (e) => {
+            // Complete task
+            if (e.target.closest('.complete-btn') || e.target.classList.contains('fa-circle') || e.target.classList.contains('fa-check-circle')) {
+                const btn = e.target.closest('.complete-btn');
+                const id = btn.getAttribute('data-id');
+                const task = tasks.find(task => task.id === id);
+                if (task) {
+                    task.completed = !task.completed;
+                    saveUserData();
+                    renderTasks();
+                }
+            }
+
+            // Edit task
+            if (e.target.closest('.edit-btn') || e.target.classList.contains('fa-pencil-alt')) {
+                const btn = e.target.closest('.edit-btn');
+                const id = btn.getAttribute('data-id');
+                const task = tasks.find(task => task.id === id);
+                if (task) {
+                    currentEditId = id;
+                    editTaskInput.value = task.text;
+                    editModal.classList.remove('hidden');
+                }
+            }
+
+            // Delete task
+            if (e.target.closest('.delete-btn') || e.target.classList.contains('fa-trash')) {
+                const btn = e.target.closest('.delete-btn');
+                const id = btn.getAttribute('data-id');
+                tasks = tasks.filter(task => task.id !== id);
+                saveUserData();
+                renderTasks();
+            }
+        });
+
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                currentFilter = btn.getAttribute('data-filter');
+                filterBtns.forEach(b => b.classList.remove('bg-gray-100'));
+                btn.classList.add('bg-gray-100');
+                renderTasks();
+            });
+        });
+
+        closeModalBtn.addEventListener('click', () => {
+            editModal.classList.add('hidden');
+        });
+
+        cancelEditBtn.addEventListener('click', () => {
+            editModal.classList.add('hidden');
+        });
+
+        saveEditBtn.addEventListener('click', () => {
+            const newText = editTaskInput.value.trim();
+            if (newText && currentEditId) {
+                const task = tasks.find(task => task.id === currentEditId);
+                if (task) {
+                    task.text = newText;
+                    saveUserData();
+                    renderTasks();
+                    editModal.classList.add('hidden');
+                }
+            }
+        });
+
+        // Initialize the app
+        initApp();
+    </script>
+</body>
+</html>
+
