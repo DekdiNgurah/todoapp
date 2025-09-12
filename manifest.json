@@ -1,6 +1,6 @@
 {
-  "name": "Clean Todo App",
-  "short_name": "Todo App by Dekdi",
+  "name": "Tasks Lister",
+  "short_name": "Tasks Lister",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
