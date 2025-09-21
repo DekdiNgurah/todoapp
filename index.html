@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clean Todo App</title>
+    <title>Task Lister - Pencatatan Aktivitas Kuliah</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"> -->
 
     <!-- Favicon & Icons -->
     <link rel="icon" type="image/png" sizes="32x32" href="icon.png">
@@ -17,347 +17,1194 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#3b82f6">
 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .custom-shadow {
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        .active-tab {
+            background-color: #3b82f6;
+            color: white;
         }
 
-        .gradient-text {
-            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
+        .format-btn {
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-right: 4px;
+            cursor: pointer;
+            background-color: #f3f4f6;
         }
 
-        .task-input:focus {
-            outline: none;
-            box-shadow: 0 0 0 2px #3b82f6;
+        .format-btn:hover {
+            background-color: #e5e7eb;
+        }
+
+        .task-item {
+            transition: all 0.3s ease;
+        }
+
+        .task-item:hover {
+            background-color: #f9fafb;
+        }
+
+        #sidebar {
+            transition: transform 0.3s ease;
+        }
+
+        @media (max-width: 768px) {
+            #sidebar {
+                transform: translateX(-100%);
+                position: fixed;
+                z-index: 40;
+                height: 100vh;
+            }
+
+            #sidebar.open {
+                transform: translateX(0);
+            }
         }
     </style>
 </head>
 
-
-<body class="bg-gray-50 min-h-screen">
-    <div id="auth-container"
-        class="fixed inset-0 flex items-center justify-center bg-white z-50 transition-opacity duration-300">
-        <div class="w-full max-w-md p-8 space-y-8 rounded-xl custom-shadow bg-white">
-            <div class="text-center">
-                <h1 class="text-3xl font-bold gradient-text">Todo App</h1>
-                <p class="mt-2 text-gray-500">Manage your tasks efficiently</p>
+<body class="bg-gray-100 min-h-screen">
+    <div class="flex">
+        <!-- Sidebar -->
+        <div id="sidebar" class="bg-blue-800 text-white w-64 min-h-screen fixed md:relative">
+            <div class="p-4 border-b border-blue-700">
+                <h1 class="text-xl font-bold">Task Lister</h1>
+                <p class="text-sm text-blue-200">Pencatatan Tugas Kuliah</p>
             </div>
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Username</label>
-                    <input type="text" id="username" required
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="Enter your username">
+            <nav class="p-4">
+                <ul>
+                    <li class="mb-2">
+                        <a href="#" data-page="dashboard"
+                            class="flex items-center p-2 rounded hover:bg-blue-700 active-tab">
+                            <i class="fas fa-tachometer-alt mr-3"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="mb-2">
+                        <div class="dropdown">
+                            <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700 semester-toggle">
+                                <i class="fas fa-book mr-3"></i> Semester
+                                <i class="fas fa-chevron-down ml-auto"></i>
+                            </a>
+                            <ul class="dropdown-menu mt-1 ml-6 hidden">
+                                <li><a href="#" data-page="semester-1"
+                                        class="block p-2 rounded hover:bg-blue-700">Semester 1</a></li>
+                                <li><a href="#" data-page="semester-2"
+                                        class="block p-2 rounded hover:bg-blue-700">Semester 2</a></li>
+                                <li><a href="#" data-page="semester-3"
+                                        class="block p-2 rounded hover:bg-blue-700">Semester 3</a></li>
+                                <li><a href="#" data-page="semester-4"
+                                        class="block p-2 rounded hover:bg-blue-700">Semester 4</a></li>
+                                <li><a href="#" data-page="semester-5"
+                                        class="block p-2 rounded hover:bg-blue-700">Semester 5</a></li>
+                                <li><a href="#" data-page="semester-6"
+                                        class="block p-2 rounded hover:bg-blue-700">Semester 6</a></li>
+                                <li><a href="#" data-page="semester-7"
+                                        class="block p-2 rounded hover:bg-blue-700">Semester 7</a></li>
+                                <li><a href="#" data-page="semester-8"
+                                        class="block p-2 rounded hover:bg-blue-700">Semester 8</a></li>
+                            </ul>
+                        </div>
+                    </li>
+                    <li class="mb-2">
+                        <a href="#" data-page="tugas" class="flex items-center p-2 rounded hover:bg-blue-700">
+                            <i class="fas fa-tasks mr-3"></i> List Tugas
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 md:ml-0">
+            <!-- Header -->
+            <header class="bg-white shadow-sm p-4 flex justify-between items-center">
+                <button id="sidebarToggle" class="md:hidden text-gray-500">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+                <h2 class="text-xl font-semibold page-title">Dashboard</h2>
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-user text-blue-600"></i>
+                    </div>
                 </div>
-                <button id="login-btn"
-                    class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                    Continue
+            </header>
+
+            <!-- Main Content Area -->
+            <main class="p-4 md:p-6">
+                <!-- Dashboard Page -->
+                <div id="dashboard-page" class="page-content">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                        <div class="bg-white rounded-lg shadow p-4">
+                            <div class="flex items-center">
+                                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+                                    <i class="fas fa-book text-blue-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <p class="text-gray-500 text-sm">Jumlah Mata Kuliah</p>
+                                    <h3 class="text-2xl font-bold" id="total-courses">0</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-lg shadow p-4">
+                            <div class="flex items-center">
+                                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
+                                    <i class="fas fa-tasks text-green-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <p class="text-gray-500 text-sm">Jumlah Tugas</p>
+                                    <h3 class="text-2xl font-bold" id="total-tasks">0</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-lg shadow p-4">
+                            <div class="flex items-center">
+                                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mr-4">
+                                    <i class="fas fa-file-alt text-purple-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <p class="text-gray-500 text-sm">Jumlah Materi</p>
+                                    <h3 class="text-2xl font-bold" id="total-materials">0</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-lg shadow p-4">
+                            <div class="flex items-center">
+                                <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mr-4">
+                                    <i class="fas fa-check-circle text-yellow-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <p class="text-gray-500 text-sm">Tugas Selesai</p>
+                                    <h3 class="text-2xl font-bold" id="completed-tasks">0</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold mb-4">Aktivitas Terbaru</h3>
+                        <div class="space-y-4" id="recent-activities">
+                            <p class="text-gray-500 text-center py-4">Tidak ada aktivitas terbaru</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Semester Pages -->
+                <div id="semester-pages" class="page-content hidden">
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-lg font-semibold" id="semester-title">Mata Kuliah</h3>
+                        </div>
+
+                        <div class="mb-6">
+                            <div class="flex justify-between items-center mb-4">
+                                <h4 class="font-medium text-gray-700">Daftar Mata Kuliah</h4>
+                                <button
+                                    class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm add-course-btn">
+                                    <i class="fas fa-plus mr-1"></i> Tambah Mata Kuliah
+                                </button>
+                            </div>
+                            <div id="course-list" class="space-y-3">
+                                <!-- Courses will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Halaman Materi Per Mata Kuliah -->
+                <div id="course-page" class="page-content hidden">
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-lg font-semibold" id="course-title">Nama Mata Kuliah</h3>
+                            <button onclick="backToSemester()"
+                                class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 text-sm">
+                                ← Kembali
+                            </button>
+                        </div>
+
+                        <div class="mb-6">
+                            <div class="flex justify-between items-center mb-4">
+                                <h4 class="font-medium text-gray-700">Daftar Materi</h4>
+                                <button
+                                    class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm add-material-btn">
+                                    <i class="fas fa-plus mr-1"></i> Tambah Materi
+                                </button>
+                            </div>
+                            <div id="material-list" class="space-y-3">
+                                <!-- Materi akan di-render di sini -->
+
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Tugas Page -->
+                <div id="tugas-page" class="page-content hidden">
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-lg font-semibold">Daftar Tugas</h3>
+                            <button
+                                class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm add-task-btn">
+                                <i class="fas fa-plus mr-1"></i> Tambah Tugas
+                            </button>
+                        </div>
+
+                        <div id="task-list" class="space-y-3">
+                            <!-- Tasks will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modal for Viewing Material -->
+    <div id="view-material-modal"
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-lg shadow-lg w-11/12 md:w-2/3 lg:w-1/2 max-h-screen overflow-y-auto">
+            <div class="p-4 border-b">
+                <h3 class="text-lg font-semibold" id="view-material-title">Judul Materi</h3>
+            </div>
+            <div class="p-4">
+                <div id="view-material-content" class="prose max-w-none text-gray-800">
+                    <!-- Isi materi akan dimasukkan lewat JS -->
+                </div>
+            </div>
+            <div class="p-4 border-t flex justify-end">
+                <button class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 view-material-close">
+                    Tutup
                 </button>
             </div>
         </div>
     </div>
 
-    <div id="app-container" class="hidden max-w-4xl mx-auto p-4 md:p-6">
-        <header class="flex justify-between items-center mb-8">
-            <div>
-                <h1 class="text-2xl md:text-3xl font-bold gradient-text">Tasks List</h1>
-                <p class="text-sm text-gray-500" id="welcome-message">Welcome back, <span id="current-user"
-                        class="font-medium"></span></p>
+
+    <!-- Modal for Adding Course -->
+    <div id="course-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-lg shadow-lg w-11/12 md:w-1/2 lg:w-1/3 max-h-screen overflow-y-auto">
+            <div class="p-4 border-b">
+                <h3 class="text-lg font-semibold" id="course-modal-title">Tambah Mata Kuliah</h3>
             </div>
-            <button id="logout-btn" class="text-gray-500 hover:text-gray-700">
-                <i class="fas fa-sign-out-alt"></i>
-            </button>
-        </header>
-
-        <div class="bg-white rounded-xl custom-shadow p-4 mb-6">
-            <form id="task-form" class="flex items-stretch">
-                <input type="text" id="task-input"
-                    class="flex-1 task-input border-0 px-4 py-3 rounded-l-xl outline-none focus:ring-0"
-                    placeholder="Add your task here..." autocomplete="off">
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 rounded-xl">
-                    <i class="fas fa-plus"></i>
-                </button>
-            </form>
-        </div>
-
-        <div class="flex justify-center mb-6 overflow-x-auto">
-            <div class="inline-flex rounded-md shadow-sm" role="group">
-                <button type="button" data-filter="all"
-                    class="filter-btn px-4 py-2 text-sm font-medium rounded-l-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50">
-                    All
-                </button>
-                <button type="button" data-filter="active"
-                    class="filter-btn px-4 py-2 text-sm font-medium border-t border-b border-gray-200 bg-white text-gray-700 hover:bg-gray-50">
-                    Active
-                </button>
-                <button type="button" data-filter="completed"
-                    class="filter-btn px-4 py-2 text-sm font-medium rounded-r-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50">
-                    Completed
-                </button>
+            <div class="p-4">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-medium mb-1" for="course-name">Nama Mata
+                        Kuliah</label>
+                    <input type="text" id="course-name"
+                        class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-medium mb-1" for="course-semester">Semester</label>
+                    <select id="course-semester"
+                        class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="1">Semester 1</option>
+                        <option value="2">Semester 2</option>
+                        <option value="3">Semester 3</option>
+                        <option value="4">Semester 4</option>
+                        <option value="5">Semester 5</option>
+                        <option value="6">Semester 6</option>
+                        <option value="7">Semester 7</option>
+                        <option value="8">Semester 8</option>
+                    </select>
+                </div>
             </div>
-        </div>
-
-        <!-- Tasks List -->
-        <div id="tasks-container" class="space-y-3">
-            <!-- Tasks will be dynamically added here -->
-        </div>
-
-        <!-- Empty State -->
-        <div id="empty-state" class="hidden flex flex-col items-center justify-center py-12">
-            <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/ee8e7244-3303-4e29-9b6b-df7d3e6871bd.png"
-                alt="Illustration of an empty task list showing a clipboard with a checkmark and a pencil"
-                class="mb-4 rounded-lg">
-            <h3 class="text-lg font-medium text-gray-900">No tasks yet</h3>
-            <p class="text-gray-500 text-center max-w-md mt-1">Click the plus button above to add your first task.
-                <br>You'll see it appear here.
-            </p>
-        </div>
-
-        <!-- Edit Modal -->
-        <div id="edit-modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden z-40">
-            <div class="bg-white rounded-xl p-6 w-full max-w-md mx-4">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-medium">Edit Task</h3>
-                    <button id="close-modal" class="text-gray-500 hover:text-gray-700">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <input type="text" id="edit-task-input" class="w-full px-3 py-2 border border-gray-300 rounded-md">
-                <div class="mt-4 flex justify-end space-x-2">
-                    <button id="cancel-edit"
-                        class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">Cancel</button>
-                    <button id="save-edit"
-                        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Save</button>
-                </div>
+            <div class="p-4 border-t flex justify-end space-x-2">
+                <button
+                    class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100 course-modal-cancel">Batal</button>
+                <button
+                    class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 course-modal-save">Simpan</button>
             </div>
         </div>
     </div>
 
-    <footer>
-        <div class="text-center text-gray-400 text-sm py-4">
-            &copy; 2025 Tasks Lister. Developed By Dekdi Ngurahh.
+    <!-- Modal for Adding Material -->
+    <div id="material-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-lg shadow-lg w-11/12 md:w-2/3 lg:w-1/2 max-h-screen overflow-y-auto">
+            <div class="p-4 border-b">
+                <h3 class="text-lg font-semibold" id="material-modal-title">Tambah Materi</h3>
+            </div>
+            <div class="p-4">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-medium mb-1" for="material-title">Judul
+                        Materi</label>
+                    <input type="text" id="material-title"
+                        class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-medium mb-1" for="material-content">Isi
+                        Materi</label>
+                    <!-- Toolbar -->
+                    <div class="border rounded-md mb-2 p-1 bg-gray-50 formatting-toolbar space-x-2">
+                        <button type="button" class="format-btn bold-btn px-2 py-1 border rounded hover:bg-gray-200"
+                            title="Bold">
+                            <i class="fas fa-bold"></i>
+                        </button>
+                        <button type="button" class="format-btn italic-btn px-2 py-1 border rounded hover:bg-gray-200"
+                            title="Italic">
+                            <i class="fas fa-italic"></i>
+                        </button>
+                        <button type="button"
+                            class="format-btn underline-btn px-2 py-1 border rounded hover:bg-gray-200"
+                            title="Underline">
+                            <i class="fas fa-underline"></i>
+                        </button>
+                        <button type="button" class="format-btn list-ol-btn px-2 py-1 border rounded hover:bg-gray-200"
+                            title="Ordered List">
+                            <i class="fas fa-list-ol"></i>
+                        </button>
+                        <button type="button" class="format-btn list-ul-btn px-2 py-1 border rounded hover:bg-gray-200"
+                            title="Unordered List">
+                            <i class="fas fa-list-ul"></i>
+                        </button>
+                    </div>
+                    <div id="material-content" contenteditable="true"
+                        class="border rounded-md p-2 min-h-[150px] bg-white focus:outline-none focus:ring focus:ring-blue-300">
+                    </div>
+                </div>
+            </div>
+            <div class="p-4 border-t flex justify-end space-x-2">
+                <button
+                    class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100 material-clear">Bersihkan</button>
+                <button
+                    class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100 material-modal-cancel">Batal</button>
+                <button
+                    class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 material-modal-save">Simpan</button>
+            </div>
         </div>
-    </footer>
+    </div>
+
+    <!-- Modal for Adding Task -->
+    <div id="task-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-lg shadow-lg w-11/12 md:w-2/3 lg:w-1/2 max-h-screen overflow-y-auto">
+            <div class="p-4 border-b">
+                <h3 class="text-lg font-semibold" id="task-modal-title">Tambah Tugas</h3>
+            </div>
+            <div class="p-4">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-medium mb-1" for="task-title">Judul Tugas</label>
+                    <input type="text" id="task-title"
+                        class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-medium mb-1" for="task-description">Deskripsi
+                        Tugas</label>
+                    <textarea id="task-description" rows="4"
+                        class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-gray-700 text-sm font-medium mb-1" for="task-deadline">Deadline</label>
+                        <input type="date" id="task-deadline"
+                            class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 text-sm font-medium mb-1"
+                            for="task-priority">Prioritas</label>
+                        <select id="task-priority"
+                            class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="low">Rendah</option>
+                            <option value="medium">Sedang</option>
+                            <option value="high">Tinggi</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="flex items-center">
+                        <input type="checkbox" id="task-completed" class="rounded text-blue-600 focus:ring-blue-500">
+                        <span class="ml-2 text-gray-700 text-sm">Tandai sebagai selesai</span>
+                    </label>
+                </div>
+            </div>
+            <div class="p-4 border-t flex justify-end space-x-2">
+                <button
+                    class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100 task-modal-cancel">Batal</button>
+                <button
+                    class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 task-modal-save">Simpan</button>
+            </div>
+        </div>
+    </div>
 
     <script>
-        // DOM Elements
-        const authContainer = document.getElementById('auth-container');
-        const appContainer = document.getElementById('app-container');
-        const usernameInput = document.getElementById('username');
-        const loginBtn = document.getElementById('login-btn');
-        const logoutBtn = document.getElementById('logout-btn');
-        const currentUserDisplay = document.getElementById('current-user');
-        const taskForm = document.getElementById('task-form');
-        const taskInput = document.getElementById('task-input');
-        const tasksContainer = document.getElementById('tasks-container');
-        const emptyState = document.getElementById('empty-state');
-        const filterBtns = document.querySelectorAll('.filter-btn');
-        const editModal = document.getElementById('edit-modal');
-        const editTaskInput = document.getElementById('edit-task-input');
-        const closeModalBtn = document.getElementById('close-modal');
-        const cancelEditBtn = document.getElementById('cancel-edit');
-        const saveEditBtn = document.getElementById('save-edit');
+        // Initial data structure
+        let appData = {
+            courses: [],
+            tasks: [],
+            activities: []
+        };
 
-        // App State
-        let currentUser = '';
-        let currentFilter = 'all';
-        let tasks = [];
-        let currentEditId = null;
+        // Current state
+        let currentPage = 'dashboard';
+        let currentSemester = null;
+        let currentCourseId = null;
+        let editingMaterialId = null;
+        let editingTaskId = null;
+        let currentCourse = null;
+
+        // DOM elements
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebar = document.getElementById('sidebar');
+        const pageTitle = document.querySelector('.page-title');
+        const pageContents = document.querySelectorAll('.page-content');
+        const navLinks = document.querySelectorAll('nav a');
+        const semesterToggles = document.querySelectorAll('.semester-toggle');
 
         // Initialize the app
         function initApp() {
-            // Check if user is already logged in
-            const loggedInUser = localStorage.getItem('currentUser');
-            if (loggedInUser) {
-                currentUser = loggedInUser;
-                loadUserData();
-                showApp();
-            }
+            loadData();
+            updateStatistics();
+            showPage(currentPage);
+            setupEventListeners();
         }
 
-        // Load user data from localStorage
-        function loadUserData() {
-            const userTasks = localStorage.getItem(`tasks_${currentUser}`);
-            if (userTasks) {
-                tasks = JSON.parse(userTasks);
-                renderTasks();
+        // Load data from localStorage
+        function loadData() {
+            const savedData = localStorage.getItem('academicDashboardData');
+            if (savedData) {
+                appData = JSON.parse(savedData);
             } else {
-                tasks = [];
+                // Add sample data for demonstration
+                appData.courses = [
+                    { id: 1, name: 'kontol Web', semester: 1 },
+                    { id: 2, name: 'Basis Data', semester: 1 },
+                    { id: 3, name: 'Algoritma dan Struktur Data', semester: 2 }
+                ];
+
+                appData.tasks = [
+                    { id: 1, title: 'Tugas HTML & CSS', description: 'Buat website portfolio sederhana', deadline: '2023-11-30', priority: 'high', completed: false },
+                    { id: 2, title: 'Laporan Basis Data', description: 'Buat ERD untuk sistem perpustakaan', deadline: '2023-12-05', priority: 'medium', completed: true }
+                ];
+
+                appData.activities = [
+                    { type: 'task', action: 'completed', target: 'Tugas HTML & CSS', time: new Date().toISOString() },
+                    { type: 'material', action: 'added', target: 'Pengenalan JavaScript', time: new Date(Date.now() - 86400000).toISOString() }
+                ];
+
+                saveData();
             }
-            currentUserDisplay.textContent = currentUser;
         }
 
-        // Save user data to localStorage
-        function saveUserData() {
-            localStorage.setItem(`tasks_${currentUser}`, JSON.stringify(tasks));
+        // Save data to localStorage
+        function saveData() {
+            localStorage.setItem('academicDashboardData', JSON.stringify(appData));
         }
 
-        // Show the main app interface
-        function showApp() {
-            authContainer.classList.add('hidden');
-            appContainer.classList.remove('hidden');
+        // Update statistics on dashboard
+        function updateStatistics() {
+            document.getElementById('total-courses').textContent = appData.courses.length;
+            document.getElementById('total-tasks').textContent = appData.tasks.length;
+
+            // Calculate total materials across all courses
+            const totalMaterials = appData.courses.reduce((total, course) => {
+                return total + (course.materials ? course.materials.length : 0);
+            }, 0);
+            document.getElementById('total-materials').textContent = totalMaterials;
+
+            // Calculate completed tasks
+            const completedTasks = appData.tasks.filter(task => task.completed).length;
+            document.getElementById('completed-tasks').textContent = completedTasks;
+
+            // Update recent activities
+            updateRecentActivities();
+        }
+
+        // Update recent activities list
+        function updateRecentActivities() {
+            const activitiesContainer = document.getElementById('recent-activities');
+            activitiesContainer.innerHTML = '';
+
+            if (appData.activities.length === 0) {
+                activitiesContainer.innerHTML = '<p class="text-gray-500 text-center py-4">Tidak ada aktivitas terbaru</p>';
+                return;
+            }
+
+            // Sort activities by time (newest first) and take the latest 5
+            const recentActivities = [...appData.activities]
+                .sort((a, b) => new Date(b.time) - new Date(a.time))
+                .slice(0, 5);
+
+            recentActivities.forEach(activity => {
+                const activityEl = document.createElement('div');
+                activityEl.className = 'flex items-start border-b border-gray-100 pb-4 last:border-0';
+
+                let icon = '';
+                let actionText = '';
+
+                if (activity.type === 'task') {
+                    icon = '<div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0"><i class="fas fa-tasks text-green-600"></i></div>';
+
+                    if (activity.action === 'added') actionText = 'menambahkan tugas';
+                    else if (activity.action === 'completed') actionText = 'menyelesaikan tugas';
+                    else if (activity.action === 'updated') actionText = 'memperbarui tugas';
+                    else if (activity.action === 'deleted') actionText = 'menghapus tugas';
+                } else if (activity.type === 'material') {
+                    icon = '<div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0"><i class="fas fa-file-alt text-blue-600"></i></div>';
+
+                    if (activity.action === 'added') actionText = 'menambahkan materi';
+                    else if (activity.action === 'updated') actionText = 'memperbarui materi';
+                    else if (activity.action === 'deleted') actionText = 'menghapus materi';
+                } else if (activity.type === 'course') {
+                    icon = '<div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0"><i class="fas fa-book text-purple-600"></i></div>';
+
+                    if (activity.action === 'added') actionText = 'menambahkan mata kuliah';
+                    else if (activity.action === 'deleted') actionText = 'menghapus mata kuliah';
+                }
+
+                const time = new Date(activity.time);
+                const timeStr = time.toLocaleDateString('id-ID', {
+                    day: 'numeric',
+                    month: 'short',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                activityEl.innerHTML = `
+                    ${icon}
+                    <div>
+                        <p class="text-sm">
+                            <span class="font-medium">Kamu</span> ${actionText} <span class="font-medium">"${activity.target}"</span>
+                        </p>
+                        <p class="text-xs text-gray-500">${timeStr}</p>
+                    </div>
+                `;
+
+                activitiesContainer.appendChild(activityEl);
+            });
+        }
+
+        // Show specific page
+        function showPage(page) {
+            // Hide all pages
+            pageContents.forEach(content => {
+                content.classList.add('hidden');
+            });
+
+            // Remove active class from all nav links
+            navLinks.forEach(link => {
+                link.classList.remove('active-tab');
+            });
+
+            // Show the requested page
+            if (page === 'dashboard') {
+                document.getElementById('dashboard-page').classList.remove('hidden');
+                pageTitle.textContent = 'Dashboard';
+                document.querySelector('nav a[data-page="dashboard"]').classList.add('active-tab');
+            }
+            else if (page.startsWith('semester-')) {
+                document.getElementById('semester-pages').classList.remove('hidden');
+                const semesterNum = parseInt(page.split('-')[1]);
+                currentSemester = semesterNum;
+                pageTitle.textContent = `Semester ${semesterNum}`;
+                document.getElementById('semester-title').textContent = `Mata Kuliah Semester ${semesterNum}`;
+                renderCourses(semesterNum);
+            }
+            else if (page === 'tugas') {
+                document.getElementById('tugas-page').classList.remove('hidden');
+                pageTitle.textContent = 'Daftar Tugas';
+                renderTasks();
+            }
+
+            currentPage = page;
+        }
+
+        // Render courses for a specific semester
+        function renderCourses(semester) {
+            const courseList = document.getElementById('course-list');
+            courseList.innerHTML = '';
+
+            const courses = appData.courses.filter(c => c.semester == semester);
+
+            courses.forEach(course => {
+                const div = document.createElement('div');
+                div.className = "p-4 border rounded-md flex justify-between items-center";
+
+                div.innerHTML = `
+      <span class="font-medium">${course.name}</span>
+      <div>
+        <button class="bg-green-600 text-white px-3 py-1 rounded-md hover:bg-green-700 text-sm"
+          onclick="openCoursePage(${course.id})">
+          Lihat Materi
+        </button>
+        <button class="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700"
+                      onclick="deleteCourse(${course.id})">
+                      Hapus
+                  </button>
+        </div>
+    `;
+
+                courseList.appendChild(div);
+            });
+        }
+
+        function openCoursePage(courseId) {
+            currentCourseId = courseId;
+            const course = appData.courses.find(c => c.id == courseId);
+            if (!course) return;
+
+            document.getElementById('semester-pages').classList.add('hidden');
+            document.getElementById('course-page').classList.remove('hidden');
+            document.getElementById('course-title').innerText = course.name;
+
+            renderMaterials(courseId);
+        }
+
+        function backToSemester() {
+            document.getElementById('course-page').classList.add('hidden');
+            document.getElementById('semester-pages').classList.remove('hidden');
+        }
+
+        // === Render daftar materi ===
+        function renderMaterials(courseId) {
+            const course = appData.courses.find(c => c.id === courseId);
+            if (!course) return;
+
+            if (!course.materials) course.materials = []; // inisialisasi jika kosong
+
+            const materialList = document.getElementById("material-list");
+            materialList.innerHTML = ""; // clear isi lama
+
+            if (course.materials.length === 0) {
+                materialList.innerHTML = `
+            <p class="text-gray-500 text-center py-4">Belum ada materi</p>
+        `;
+                return;
+            }
+
+            course.materials.forEach(material => {
+                const div = document.createElement("div");
+                div.className = "p-3 border rounded flex justify-between items-center";
+                div.innerHTML = `
+            <span class="font-medium">${material.title}</span>
+            <div class="space-x-2">
+                <button class="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700"
+                    onclick="viewMaterial(${course.id}, ${material.id})">
+                    Lihat
+                </button>
+                <button class="px-3 py-1 text-sm bg-yellow-500 text-white rounded hover:bg-yellow-600"
+                    onclick="editMaterial(${course.id}, ${material.id})">
+                    Edit
+                </button>
+                <button class="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700"
+                    onclick="deleteMaterial(${course.id}, ${material.id})">
+                    Hapus
+                </button>
+            </div>
+        `;
+                materialList.appendChild(div);
+            });
+        }
+
+
+
+
+        // Render tasks list
+        function renderTasks() {
+            const taskList = document.getElementById('task-list');
+            taskList.innerHTML = '';
+
+            if (appData.tasks.length === 0) {
+                taskList.innerHTML = `
+                    <div class="text-center py-8 text-gray-500">
+                        <i class="fas fa-tasks text-4xl mb-2 text-gray-300"></i>
+                        <p>Belum ada tugas</p>
+                    </div>
+                `;
+                return;
+            }
+
+            appData.tasks.forEach(task => {
+                const priorityColors = {
+                    low: 'bg-green-100 text-green-800',
+                    medium: 'bg-yellow-100 text-yellow-800',
+                    high: 'bg-red-100 text-red-800'
+                };
+
+                const taskEl = document.createElement('div');
+                taskEl.className = `task-item bg-white rounded-lg border p-4 ${task.completed ? 'opacity-70' : ''}`;
+                taskEl.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="flex items-center">
+                            <input type="checkbox" ${task.completed ? 'checked' : ''} class="task-completed mr-3 h-5 w-5 text-blue-600 rounded" data-task-id="${task.id}">
+                            <h4 class="font-medium ${task.completed ? 'line-through text-gray-500' : ''}">${task.title}</h4>
+                        </div>
+                        <span class="text-xs px-2 py-1 rounded-full ${priorityColors[task.priority]}">${task.priority === 'high' ? 'Tinggi' : task.priority === 'medium' ? 'Sedang' : 'Rendah'}</span>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-3 ${task.completed ? 'line-through' : ''}">${task.description}</p>
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="text-gray-500">Deadline: ${new Date(task.deadline).toLocaleDateString('id-ID')}</span>
+                        <div>
+                            <button class="text-blue-600 hover:text-blue-800 mr-2 edit-task-btn" data-task-id="${task.id}">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button class="text-red-600 hover:text-red-800 delete-task-btn" data-task-id="${task.id}">
+                                <i class="fas fa-trash"></i> Hapus
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                taskList.appendChild(taskEl);
+            });
+
+            // Add event listeners to the dynamically created buttons
+            document.querySelectorAll('.task-completed').forEach(checkbox => {
+                checkbox.addEventListener('change', function () {
+                    const taskId = this.getAttribute('data-task-id');
+                    toggleTaskCompletion(taskId, this.checked);
+                });
+            });
+
+            document.querySelectorAll('.edit-task-btn').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const taskId = this.getAttribute('data-task-id');
+                    editTask(taskId);
+                });
+            });
+
+            document.querySelectorAll('.delete-task-btn').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const taskId = this.getAttribute('data-task-id');
+                    deleteTask(taskId);
+                });
+            });
+        }
+
+        // Show material modal
+        function showMaterialModal() {
+            document.getElementById('material-modal-title').textContent = 'Tambah Materi';
+            document.getElementById('material-title').value = '';
+            document.getElementById('material-content').value = '';
+            editingMaterialId = null;
+            document.getElementById('material-modal').classList.remove('hidden');
+        }
+
+        // === View Material ===
+        function viewMaterial(courseId, materialId) {
+            const course = appData.courses.find(c => c.id == courseId);
+            if (!course || !course.materials) return;
+
+            const material = course.materials.find(m => m.id == materialId);
+            if (!material) return;
+
+            document.getElementById('view-material-title').textContent = material.title;
+            document.getElementById('view-material-content').innerHTML = material.content;
+
+            document.getElementById('view-material-modal').classList.remove('hidden');
+        }
+
+
+
+        // Close View Modal
+        document.querySelector('.view-material-close').addEventListener('click', () => {
+            document.getElementById('view-material-modal').classList.add('hidden');
+        });
+
+
+        // === Edit Material ===
+        function editMaterial(courseId, materialId) {
+            const course = appData.courses.find(c => c.id == courseId);
+            if (!course || !course.materials) return;
+
+            const material = course.materials.find(m => m.id == materialId);
+            if (!material) return;
+
+            document.getElementById('material-modal-title').textContent = 'Edit Materi';
+            document.getElementById('material-title').value = material.title;
+            document.getElementById('material-content').innerHTML = material.content;
+
+            editingMaterialId = materialId;
+            currentCourseId = courseId; // simpan id course aktif
+            document.getElementById('material-modal').classList.remove('hidden');
+        }
+
+
+        // === Save Material (Tambah/Edit) ===
+        function saveMaterial() {
+            const title = document.getElementById('material-title').value.trim();
+            const content = document.getElementById('material-content').innerHTML.trim();
+
+            if (!title || !content) {
+                alert('Judul dan isi materi harus diisi');
+                return;
+            }
+
+            const course = appData.courses.find(c => c.id == currentCourseId);
+            if (!course) return;
+            if (!course.materials) course.materials = [];
+
+            if (editingMaterialId) {
+                // UPDATE
+                const material = course.materials.find(m => m.id == editingMaterialId);
+                if (material) {
+                    material.title = title;
+                    material.content = content;
+                }
+                editingMaterialId = null;
+            } else {
+                // ADD
+                course.materials.push({
+                    id: Date.now(),
+                    title,
+                    content
+                });
+            }
+
+            saveData();
+            renderMaterials(currentCourseId);
+            document.getElementById('material-modal').classList.add('hidden');
+        }
+
+        // === Delete Material ===
+        function deleteMaterial(courseId, materialId) {
+            if (!confirm('Apakah Anda yakin ingin menghapus materi ini?')) return;
+
+            const course = appData.courses.find(c => c.id == courseId);
+            if (!course || !course.materials) return;
+
+            course.materials = course.materials.filter(m => m.id != materialId);
+
+
+            saveData();
+            renderMaterials(courseId);
+        }
+
+        // === Delete Course ===
+        function deleteCourse(courseId) {
+            if (!confirm('Apakah Anda yakin ingin menghapus matkul ini?')) return;
+
+            const course = appData.courses.find(c => c.id == courseId);
+            if (!course) return;
+
+            // Simpan nama untuk aktivitas log
+            const courseName = course.name;
+
+            // Hapus dari list
+            appData.courses = appData.courses.filter(c => c.id !== courseId);
+
+            // Tambahkan ke riwayat aktivitas
+            appData.activities.push({
+                type: 'course',
+                action: 'deleted',
+                target: courseName,
+                time: new Date().toISOString()
+            });
+
+            saveData();
+            updateStatistics();
+            renderCourses(currentSemester); // refresh daftar course semester
+        }
+
+
+        // Show task modal
+        function showTaskModal() {
+            document.getElementById('task-modal-title').textContent = 'Tambah Tugas';
+            document.getElementById('task-title').value = '';
+            document.getElementById('task-description').value = '';
+            document.getElementById('task-deadline').value = '';
+            document.getElementById('task-priority').value = 'medium';
+            document.getElementById('task-completed').checked = false;
+            editingTaskId = null;
+            document.getElementById('task-modal').classList.remove('hidden');
+        }
+
+        // Edit task
+        function editTask(taskId) {
+            const task = appData.tasks.find(t => t.id == taskId);
+            if (!task) return;
+
+            document.getElementById('task-modal-title').textContent = 'Edit Tugas';
+            document.getElementById('task-title').value = task.title;
+            document.getElementById('task-description').value = task.description;
+            document.getElementById('task-deadline').value = task.deadline;
+            document.getElementById('task-priority').value = task.priority;
+            document.getElementById('task-completed').checked = task.completed;
+            editingTaskId = taskId;
+            document.getElementById('task-modal').classList.remove('hidden');
+        }
+
+        // Save task
+        function saveTask() {
+            const title = document.getElementById('task-title').value.trim();
+            const description = document.getElementById('task-description').value.trim();
+            const deadline = document.getElementById('task-deadline').value;
+            const priority = document.getElementById('task-priority').value;
+            const completed = document.getElementById('task-completed').checked;
+
+            if (!title) {
+                alert('Judul tugas tidak boleh kosong');
+                return;
+            }
+
+            if (!deadline) {
+                alert('Deadline harus diisi');
+                return;
+            }
+
+            if (editingTaskId) {
+                // Update existing task
+                const taskIndex = appData.tasks.findIndex(t => t.id == editingTaskId);
+                if (taskIndex !== -1) {
+                    appData.tasks[taskIndex].title = title;
+                    appData.tasks[taskIndex].description = description;
+                    appData.tasks[taskIndex].deadline = deadline;
+                    appData.tasks[taskIndex].priority = priority;
+                    appData.tasks[taskIndex].completed = completed;
+
+                    // Add activity
+                    appData.activities.push({
+                        type: 'task',
+                        action: 'updated',
+                        target: title,
+                        time: new Date().toISOString()
+                    });
+                }
+            } else {
+                // Add new task
+                const newId = appData.tasks.length > 0 ? Math.max(...appData.tasks.map(t => t.id)) + 1 : 1;
+                appData.tasks.push({
+                    id: newId,
+                    title,
+                    description,
+                    deadline,
+                    priority,
+                    completed
+                });
+
+                // Add activity
+                appData.activities.push({
+                    type: 'task',
+                    action: 'added',
+                    target: title,
+                    time: new Date().toISOString()
+                });
+            }
+
+            saveData();
+            updateStatistics();
+            renderTasks();
+            document.getElementById('task-modal').classList.add('hidden');
+        }
+
+        // Toggle task completion
+        function toggleTaskCompletion(taskId, completed) {
+            const task = appData.tasks.find(t => t.id == taskId);
+            if (!task) return;
+
+            task.completed = completed;
+
+            // Add activity
+            appData.activities.push({
+                type: 'task',
+                action: completed ? 'completed' : 'reopened',
+                target: task.title,
+                time: new Date().toISOString()
+            });
+
+            saveData();
+            updateStatistics();
             renderTasks();
         }
 
-        // Show the auth interface
-        function showAuth() {
-            authContainer.classList.remove('hidden');
-            appContainer.classList.add('hidden');
-            usernameInput.value = '';
-        }
+        // Delete task
+        function deleteTask(taskId) {
+            if (!confirm('Apakah Anda yakin ingin menghapus tugas ini?')) return;
 
-        // Render tasks based on current filter
-        function renderTasks() {
-            tasksContainer.innerHTML = '';
+            const taskIndex = appData.tasks.findIndex(t => t.id == taskId);
+            if (taskIndex === -1) return;
 
-            const filteredTasks = tasks.filter(task => {
-                if (currentFilter === 'all') return true;
-                if (currentFilter === 'active') return !task.completed;
-                if (currentFilter === 'completed') return task.completed;
-                return true;
-            })
+            const taskTitle = appData.tasks[taskIndex].title;
+            appData.tasks.splice(taskIndex, 1);
 
-            .sort((a, b) => b.timestamp - a.timestamp);
-
-            if (filteredTasks.length === 0) {
-                emptyState.classList.remove('hidden');
-            } else {
-                emptyState.classList.add('hidden');
-                filteredTasks.forEach(task => {
-                    const taskElement = document.createElement('div');
-                    taskElement.className = `bg-white rounded-xl custom-shadow overflow-hidden transition-all ${task.completed ? 'opacity-75' : ''}`;
-                    taskElement.innerHTML = `
-                        <div class="p-4 flex items-start">
-                            <button class="complete-btn mt-1 mr-3 flex-shrink-0 ${task.completed ? 'text-green-500' : 'text-gray-300'} hover:text-green-500" data-id="${task.id}">
-                                <i class="fas fa-${task.completed ? 'check-circle' : 'circle'}"></i>
-                            </button>
-                            <div class="flex-grow">
-                                <div class="flex justify-between items-start">
-                                    <p class="${task.completed ? 'line-through text-gray-400' : 'text-gray-700'}">${task.text}</p>
-                                    <div class="flex space-x-2">
-                                        <button class="edit-btn text-gray-400 hover:text-blue-500" data-id="${task.id}">
-                                            <i class="fas fa-pencil-alt"></i>
-                                        </button>
-                                        <button class="delete-btn text-gray-400 hover:text-red-500" data-id="${task.id}">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <small class="text-xs text-gray-400 mt-1 block">Added: ${new Date(task.timestamp).toLocaleString()}</small>
-                            </div>
-                        </div>
-                    `;
-                    tasksContainer.appendChild(taskElement);
-                });
-            }
-        }
-
-        // Event Listeners
-        loginBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            const username = usernameInput.value.trim();
-            if (username) {
-                currentUser = username;
-                localStorage.setItem('currentUser', username);
-                loadUserData();
-                showApp();
-            }
-        });
-
-        logoutBtn.addEventListener('click', () => {
-            currentUser = '';
-            localStorage.removeItem('currentUser');
-            tasks = [];
-            showAuth();
-        });
-
-        taskForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const taskText = taskInput.value.trim();
-            if (taskText && currentUser) {
-                const newTask = {
-                    id: Date.now().toString(),
-                    text: taskText,
-                    completed: false,
-                    timestamp: Date.now()
-                };
-                tasks.push(newTask);
-                saveUserData();
-                taskInput.value = '';
-                renderTasks();
-            }
-        });
-
-        tasksContainer.addEventListener('click', (e) => {
-            // Complete task
-            if (e.target.closest('.complete-btn') || e.target.classList.contains('fa-circle') || e.target.classList.contains('fa-check-circle')) {
-                const btn = e.target.closest('.complete-btn');
-                const id = btn.getAttribute('data-id');
-                const task = tasks.find(task => task.id === id);
-                if (task) {
-                    task.completed = !task.completed;
-                    saveUserData();
-                    renderTasks();
-                }
-            }
-
-            // Edit task
-            if (e.target.closest('.edit-btn') || e.target.classList.contains('fa-pencil-alt')) {
-                const btn = e.target.closest('.edit-btn');
-                const id = btn.getAttribute('data-id');
-                const task = tasks.find(task => task.id === id);
-                if (task) {
-                    currentEditId = id;
-                    editTaskInput.value = task.text;
-                    editModal.classList.remove('hidden');
-                }
-            }
-
-            // Delete task
-            if (e.target.closest('.delete-btn') || e.target.classList.contains('fa-trash')) {
-                const btn = e.target.closest('.delete-btn');
-                const id = btn.getAttribute('data-id');
-                tasks = tasks.filter(task => task.id !== id);
-                saveUserData();
-                renderTasks();
-            }
-        });
-
-        filterBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                currentFilter = btn.getAttribute('data-filter');
-                filterBtns.forEach(b => b.classList.remove('bg-blue-200'));
-                btn.classList.add('bg-blue-200');
-                renderTasks();
+            // Add activity
+            appData.activities.push({
+                type: 'task',
+                action: 'deleted',
+                target: taskTitle,
+                time: new Date().toISOString()
             });
-        });
 
-        closeModalBtn.addEventListener('click', () => {
-            editModal.classList.add('hidden');
-        });
+            saveData();
+            updateStatistics();
+            renderTasks();
+        }
 
-        cancelEditBtn.addEventListener('click', () => {
-            editModal.classList.add('hidden');
-        });
+        // Save course
+        function saveCourse() {
+            const name = document.getElementById('course-name').value.trim();
+            const semester = parseInt(document.getElementById('course-semester').value);
 
-        saveEditBtn.addEventListener('click', () => {
-            const newText = editTaskInput.value.trim();
-            if (newText && currentEditId) {
-                const task = tasks.find(task => task.id === currentEditId);
-                if (task) {
-                    task.text = newText;
-                    saveUserData();
-                    renderTasks();
-                    editModal.classList.add('hidden');
-                }
+            if (!name) {
+                alert('Nama mata kuliah tidak boleh kosong');
+                return;
             }
-        });
 
-        // Initialize the app
-        initApp();
+            // Add new course
+            const newId = appData.courses.length > 0 ? Math.max(...appData.courses.map(c => c.id)) + 1 : 1;
+            appData.courses.push({
+                id: newId,
+                name,
+                semester
+            });
+
+            // Add activity
+            appData.activities.push({
+                type: 'course',
+                action: 'added',
+                target: name,
+                time: new Date().toISOString()
+            });
+
+            saveData();
+            updateStatistics();
+            renderCourses(semester);
+            document.getElementById('course-modal').classList.add('hidden');
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Sidebar toggle for mobile
+            sidebarToggle.addEventListener('click', function () {
+                sidebar.classList.toggle('open');
+            });
+
+            // Close sidebar when clicking outside
+            document.addEventListener('click', function (e) {
+                if (
+                    sidebar.classList.contains('open') && // hanya jika sidebar sedang open
+                    !sidebar.contains(e.target) &&        // klik bukan di dalam sidebar
+                    !sidebarToggle.contains(e.target)     // klik bukan di tombol toggle
+                ) {
+                    sidebar.classList.remove('open');
+                }
+            });
+
+
+            // Navigation links
+            navLinks.forEach(link => {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const page = this.getAttribute('data-page');
+                    if (page) {
+                        showPage(page);
+
+                        // Close sidebar on mobile after navigation
+                        if (window.innerWidth < 768) {
+                            sidebar.classList.remove('open');
+                        }
+                    }
+                });
+            });
+
+            // Semester dropdown toggle
+            semesterToggles.forEach(toggle => {
+                toggle.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const menu = this.nextElementSibling;
+                    menu.classList.toggle('hidden');
+
+                    // Rotate chevron icon
+                    const chevron = this.querySelector('.fa-chevron-down');
+                    chevron.classList.toggle('rotate-180');
+                });
+            });
+
+            // Add course button
+            document.querySelectorAll('.add-course-btn').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    document.getElementById('course-modal').classList.remove('hidden');
+                });
+            });
+
+            // Course modal buttons
+            document.querySelector('.course-modal-cancel').addEventListener('click', function () {
+                document.getElementById('course-modal').classList.add('hidden');
+            });
+
+            document.querySelector('.course-modal-save').addEventListener('click', saveCourse);
+
+            // Add task button
+            document.querySelectorAll('.add-task-btn').forEach(btn => {
+                btn.addEventListener('click', showTaskModal);
+            });
+
+            // Task modal buttons
+            document.querySelector('.task-modal-cancel').addEventListener('click', function () {
+                document.getElementById('task-modal').classList.add('hidden');
+            });
+
+            document.querySelector('.task-modal-save').addEventListener('click', saveTask);
+
+            // Add material button
+            document.querySelectorAll('.add-material-btn').forEach(btn => {
+                btn.addEventListener('click', showMaterialModal);
+            });
+
+            // Material modal buttons
+            document.querySelector('.material-modal-cancel').addEventListener('click', function () {
+                document.getElementById('material-modal').classList.add('hidden');
+            });
+
+            document.querySelector('.material-modal-save').addEventListener('click', saveMaterial);
+
+            document.querySelector('.material-clear').addEventListener('click', function () {
+                document.getElementById('material-title').value = '';
+                document.getElementById('material-content').value = '';
+            });
+
+            // Fungsi umum untuk format teks
+            function formatText(command) {
+                document.execCommand(command, false, null);
+                document.getElementById("material-content").focus();
+            }
+
+            // Event listener tombol formatting
+            document.querySelector('.bold-btn').addEventListener('click', function () {
+                formatText('bold');
+            });
+
+            document.querySelector('.italic-btn').addEventListener('click', function () {
+                formatText('italic');
+            });
+
+            document.querySelector('.underline-btn').addEventListener('click', function () {
+                formatText('underline');
+            });
+
+            document.querySelector('.list-ol-btn').addEventListener('click', function () {
+                formatText('insertOrderedList');
+            });
+
+            document.querySelector('.list-ul-btn').addEventListener('click', function () {
+                formatText('insertUnorderedList');
+            });
+
+
+
+
+
+            // Close modals when clicking outside
+            document.querySelectorAll('#course-modal, #material-modal, #task-modal').forEach(modal => {
+                modal.addEventListener('click', function (e) {
+                    if (e.target === this) {
+                        this.classList.add('hidden');
+                    }
+                });
+            });
+        }
+
+        // Text formatting function
+        function formatText(command) {
+            const textarea = document.getElementById('material-content');
+            textarea.focus();
+
+            try {
+                document.execCommand(command, false, null);
+            } catch (error) {
+                console.error('Error executing format command:', error);
+            }
+        }
+
+        // Initialize the app when the DOM is loaded
+        document.addEventListener('DOMContentLoaded', initApp);
     </script>
 </body>
 
